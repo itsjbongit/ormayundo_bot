@@ -93,3 +93,5 @@ if __name__ == '__main__':
         print("🤖 Ormayundo Bot is listening in POLLING mode...")
         application.run_polling(close_loop=False) # Prevents unexpected event loop drops on local machines
 
+    application.run_polling()
+
