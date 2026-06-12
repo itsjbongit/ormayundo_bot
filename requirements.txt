@@ -2,3 +2,4 @@ python-telegram-bot
 firebase-admin
 dotenv
 datetime
+dateparser
