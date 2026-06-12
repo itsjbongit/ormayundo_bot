@@ -17,3 +17,4 @@ venv/
 # Ignore OS specific clutter
 .DS_Store
 Thumbs.db
+temperoo.py

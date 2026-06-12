@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ormayundo | Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans antialiased text-slate-800 hidden" id="dashboardBody">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-indigo-600 text-2xl"></i>
+                <span class="font-bold text-xl tracking-tight text-slate-900">Ormayundo Dashboard</span>
+            </div>
+            <button id="logoutBtn" class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors border border-slate-200">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Secure Logout
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-slate-900">Live Infrastructure Analytics</h2>
+            <p class="text-slate-500 text-sm mt-1">Direct synchronization via Firebase Client SDK</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Bot Users</p>
+                        <h3 id="statUsers" class="text-4xl font-bold text-slate-900 mt-2">
+                            <i class="fa-solid fa-spinner animate-spin text-xl text-slate-300"></i>
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                        <i class="fa-solid fa-users text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Active Scheduled Reminders</p>
+                        <h3 id="statReminders" class="text-4xl font-bold text-slate-900 mt-2">
+                            <i class="fa-solid fa-spinner animate-spin text-xl text-slate-300"></i>
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                        <i class="fa-solid fa-bell text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-indigo-900 text-indigo-100 rounded-xl p-6 shadow-sm flex items-start gap-4">
+            <i class="fa-solid fa-shield-halved text-2xl mt-0.5 text-indigo-400"></i>
+            <div>
+                <h4 class="font-semibold text-white">Client-Side Isolation Rule Enabled</h4>
+                <p class="text-indigo-200 text-sm mt-1">
+                    This web app hooks directly to Firestore. Network metrics and reads are calculated at runtime using cryptographic keys. Keep Firestore indexing optimized for rapid polling.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ⚠️ PASTE THE EXACT SAME CONFIG AS INDEX.HTML HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZT30rctjtPEBAjrkOQpF1cxRszcV2Dp0",
+            authDomain: "ormayundobot.firebaseapp.com",
+            projectId: "ormayundobot",
+            storageBucket: "ormayundobot.firebasestorage.app",
+            messagingSenderId: "900848756830",
+            appId: "1:900848756830:web:9428dd5a308fe49e0beccf"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // AUTH GUARD: Watch authorization context state transitions
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                // If user is not authenticated, bounce them immediately back to landing page
+                window.location.href = 'index.html';
+            } else {
+                // Reveal page body seamlessly once token verification clears
+                document.getElementById('dashboardBody').classList.remove('hidden');
+                // Query real-time snapshot statistics from Firestore collections
+                fetchLiveDatabaseStats();
+            }
+        });
+
+        // Pull Real-time Statistics
+        async function fetchLiveDatabaseStats() {
+            try {
+                // Highly optimized serverless count extraction (Saves read quota costs!)
+                const usersCollection = collection(db, "users");
+                const usersSnapshot = await getCountFromServer(usersCollection);
+                document.getElementById('statUsers').innerText = usersSnapshot.data().count;
+
+                const remindersCollection = collection(db, "reminders");
+                const remindersSnapshot = await getCountFromServer(remindersCollection);
+                document.getElementById('statReminders').innerText = remindersSnapshot.data().count;
+            } catch (error) {
+                console.error("Database query failed:", error);
+                document.getElementById('statUsers').innerText = "Error";
+                document.getElementById('statReminders').innerText = "Error";
+            }
+        }
+
+        // Handle Logout Execution Call
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
