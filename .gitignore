@@ -1,0 +1,19 @@
+# Ignore environment variables and credentials (CRITICAL FOR SECURITY)
+.env
+*.json
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+
+# Ignore the Python Virtual Environment folder
+venv/
+.venv/
+
+# Ignore IDE specific configuration folders (like VS Code or PyCharm)
+.vscode/
+.idea/
+
+# Ignore OS specific clutter
+.DS_Store
+Thumbs.db
