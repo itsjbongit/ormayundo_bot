@@ -107,3 +107,9 @@ def main():
 if __name__ == '__main__':
     keep_alive()  # 🚀 Starts Flask Background thread for Render FIRST
     main()        # 🤖 Then calls the main setup function to start the bot SECOND
+
+# To keep the ping service active
+
+@app.route('/')
+def home():
+    return "Bot is alive!", 200
